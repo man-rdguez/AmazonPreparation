@@ -2,15 +2,10 @@ package shortest_sub_segment;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
-
-import static java.util.stream.Collectors.joining;
 
 public class Solution {
 
-   private static void loadWords( ArrayList<String> words, ArrayList<String> wordsToFind, int numOfWords ){
+   private static void loadWords( ArrayList<String> words, ArrayList<String> wordsToFind ){
       if ( wordsToFind.size() == words.size() ){
          return;
       }
@@ -22,108 +17,132 @@ public class Solution {
       wordsToFind.addAll( words );
    }
 
-   private static String[] phraseWords( String text ) {
-      StringBuilder newText = new StringBuilder();
-      String alphabet = "abcdefghijklmnopqrstuvwxyz";
+   private static String getText( BufferedReader br ) throws IOException {
+      String string = br.readLine();
 
-      for ( int i = 0; i < text.length(); i++ ) {
-         if ( alphabet.contains( String.valueOf( text.toLowerCase().charAt(i) ) )
-               || text.charAt(i) == ' '
+      String alphabet = "abcdefghijklmnopqrstuvwxyz";
+      StringBuilder text = new StringBuilder();
+
+      for ( int i = 0; i < string.length(); i++ ) {
+         if ( alphabet.contains( String.valueOf( string.toLowerCase().charAt(i) ) )
+               || string.charAt(i) == ' '
          ) {
-            newText.append( text.charAt( i ) );
+            text.append( string.charAt( i ) );
          }
       }
 
-      return newText.toString().split( "\\s" );
+      return text.toString();
+   }
+
+   public static ArrayList<String> getWords( BufferedReader br ) throws IOException {
+
+      ArrayList<String> words = new ArrayList<>();
+
+         int numOfWords = Integer.parseInt(br.readLine());
+         StringBuilder word = new StringBuilder();
+
+         for (int i = 0; i < numOfWords; i++) {
+            word.append( br.readLine() );
+
+            if ( !words.contains( word.toString() ) ) {
+               words.add( word.toString() );
+            }
+
+            word.setLength(0);
+         }
+
+      return words;
    }
 
    public static void main(String[] args) throws IOException {
 
       BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+      String text = getText( br );
+      ArrayList<String> words = getWords( br );
+      br.close();
 
-      ArrayList<String> words = new ArrayList<>();
       ArrayList<String> wordsToFind = new ArrayList<>();
 
-      String text = "";
-      int numOfWords = 0;
+      int shortestLength = 0;
+      int shortestSubSegBeg = 0;
+      int shortestSubSegEnd = 0;
+      boolean noMoreSubSegs = false;
 
-      BufferedWriter bw = new BufferedWriter(new FileWriter(System.getenv("OUTPUT_PATH")));
-      text = br.readLine();
-      //System.out.println("text: " + text);
-      numOfWords = Integer.parseInt(br.readLine());
-      //System.out.println("numOfWords: " + numOfWords);
-      StringBuilder word = new StringBuilder();
 
-      for (int i = 0; i < numOfWords; i++) {
-         word.append( br.readLine() );
+      int i = 0;
+      int beg = 0;
+      int end = text.length();
 
-         if ( !words.contains( word.toString() ) ) {
-            words.add( word.toString() );
+      while ( i < text.length() && noMoreSubSegs == false ) {
+
+         loadWords(words, wordsToFind );
+
+         if ( text.charAt(i) == ' ' ) {
+            i++;
+         }
+         else {
+            beg = i;
+
+            while ( i < text.length() && text.charAt(i) != ' ' ) {
+               i++;
+            }
+
+            end = i;
          }
 
-         word.setLength(0);
-      }
+         if ( wordsToFind.contains( text.substring(beg, end).toLowerCase() ) ) {
 
-      System.out.println( "words:\n" + words.toString() );
-      System.out.println( "words size: " + words.size() );
-
-      String[] phraseWords = phraseWords(text);
-
-      int shortestLength = 0;
-      String shortestSubSegment = "";
-      StringBuilder subSegment = new StringBuilder();
-
-      outer:
-      for (int i = 0; i < phraseWords.length - numOfWords + 1; i++) {
-
-         loadWords(words, wordsToFind, numOfWords);
-
-         if (wordsToFind.contains(phraseWords[i].toLowerCase())) {
-
-            int j = i;
+            int subSegmentBeg = beg;
+            int subSegmentEnd = 0;
             int currentLength = 0;
-            subSegment.setLength(0);
 
-            while (wordsToFind.size() > 0 && j < phraseWords.length) {
-               subSegment.append(phraseWords[j] + " ");
+            while ( wordsToFind.size() > 0 && i < text.length() ) {
+               subSegmentEnd = end;
                currentLength++;
 
-               if (wordsToFind.contains(phraseWords[j].toLowerCase())) {
-                  wordsToFind.remove(phraseWords[j].toLowerCase());
+               if ( wordsToFind.contains( text.substring(beg, end).toLowerCase() ) ) {
+                  wordsToFind.remove( text.substring(beg, end).toLowerCase() );
                }
 
-               j++;
-            }
-            /*
-            System.out.println( "currentLength: " + currentLength );
-            System.out.println( "subSegment: " + subSegment.toString() );
-            System.out.println( "wordsToFind: " + wordsToFind );
-            System.out.println( "shortestSubSegment: " + shortestSubSegment );
-            System.out.println( "shortestLength: " + shortestLength );
-            */
+               if ( text.charAt(i) == ' ' ) {
+                  i++;
+               }
+               else {
+                  beg = i;
 
-            if (wordsToFind.isEmpty() ) {
-               if (currentLength < shortestLength || shortestLength == 0) {
+                  while ( i < text.length() && text.charAt(i) != ' ' ) {
+                     i++;
+                  }
+
+                  end = i;
+               }
+
+            }
+
+            if ( wordsToFind.isEmpty() ) {
+               if ( currentLength < shortestLength || shortestLength == 0 ) {
                   shortestLength = currentLength;
-                  shortestSubSegment = subSegment.toString().trim();
+                  shortestSubSegBeg = subSegmentBeg;
+                  shortestSubSegEnd = subSegmentEnd;
                }
             }
             else {
-               break outer;
+               noMoreSubSegs = true;
             }
 
          }
 
       }
 
-      if (shortestSubSegment.length() > 0) {
-         System.out.print(shortestSubSegment);
-         bw.write(shortestSubSegment);
+      BufferedWriter bw = new BufferedWriter(new FileWriter(System.getenv("OUTPUT_PATH")));
+
+      if ( shortestSubSegBeg != shortestSubSegEnd ) {
+         System.out.println( text.substring( shortestSubSegBeg, shortestSubSegEnd ) );
+         bw.write( text.substring( shortestSubSegBeg, shortestSubSegEnd ) );
       } else {
          bw.write("NO SUBSEGMENT FOUND");
       }
 
-      br.close();
       bw.close();
 
    }
