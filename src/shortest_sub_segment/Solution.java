@@ -2,6 +2,7 @@ package shortest_sub_segment;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Solution {
 
@@ -15,6 +16,7 @@ public class Solution {
       }
 
       wordsToFind.addAll( words );
+      Collections.sort( wordsToFind );
    }
 
    private static String getText( BufferedReader br ) throws IOException {
@@ -72,6 +74,7 @@ public class Solution {
       int i = 0;
       int beg = 0;
       int end = text.length();
+      int nextWordPos = 0;
 
       while ( i < text.length() && noMoreSubSegs == false ) {
 
@@ -88,6 +91,7 @@ public class Solution {
             }
 
             end = i;
+            nextWordPos = i + 1;
          }
 
          if ( wordsToFind.contains( text.substring(beg, end).toLowerCase() ) ) {
@@ -125,6 +129,8 @@ public class Solution {
                   shortestSubSegBeg = subSegmentBeg;
                   shortestSubSegEnd = subSegmentEnd;
                }
+
+               i = nextWordPos;
             }
             else {
                noMoreSubSegs = true;
