@@ -17,6 +17,7 @@ public class Solution {
 
       wordsToFind.addAll( words );
       Collections.sort( wordsToFind );
+      System.out.println( wordsToFind );
    }
 
    private static String getText( BufferedReader br ) throws IOException {
@@ -83,18 +84,19 @@ public class Solution {
          if ( text.charAt(i) == ' ' ) {
             i++;
          }
-         else {
-            beg = i;
 
-            while ( i < text.length() && text.charAt(i) != ' ' ) {
-               i++;
-            }
+         beg = i;
 
-            end = i;
-            nextWordPos = i + 1;
+         while ( i < text.length() && text.charAt(i) != ' ' ) {
+            i++;
          }
 
-         if ( wordsToFind.contains( text.substring(beg, end).toLowerCase() ) ) {
+         end = i;
+         nextWordPos = i + 1;
+
+         int dummy = 0;
+
+         if ( Collections.binarySearch( wordsToFind, text.substring(beg, end).toLowerCase() ) >= 0 ) {
 
             int subSegmentBeg = beg;
             int subSegmentEnd = 0;
@@ -104,24 +106,30 @@ public class Solution {
                subSegmentEnd = end;
                currentLength++;
 
-               if ( wordsToFind.contains( text.substring(beg, end).toLowerCase() ) ) {
+               System.out.println( text.substring(beg, end).toLowerCase() );
+               System.out.println( Collections.binarySearch( wordsToFind, text.substring(beg, end).toLowerCase() )  );
+
+               if ( Collections.binarySearch( wordsToFind, text.substring(beg, end).toLowerCase() ) >= 0 ) {
+                  System.out.println( "before: " + wordsToFind.size() );
                   wordsToFind.remove( text.substring(beg, end).toLowerCase() );
+                  System.out.println( "after: " + wordsToFind.size() );
                }
 
                if ( text.charAt(i) == ' ' ) {
                   i++;
                }
-               else {
-                  beg = i;
 
-                  while ( i < text.length() && text.charAt(i) != ' ' ) {
-                     i++;
-                  }
+               beg = i;
 
-                  end = i;
+               while ( i < text.length() && text.charAt(i) != ' ' ) {
+                  i++;
                }
 
+               end = i;
+
             }
+
+            System.out.println( "wordsToFind: \n" + wordsToFind );
 
             if ( wordsToFind.isEmpty() ) {
                if ( currentLength < shortestLength || shortestLength == 0 ) {
